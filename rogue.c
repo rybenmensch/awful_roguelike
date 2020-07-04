@@ -37,6 +37,7 @@ void check_bounds(entity *p, int y, int x);
 void run(entity *p, int speed, int y, int x);
 int is_in_bounds(int y, int x);
 int is_coll(int y, int x);
+int is_inv_cmd(char c);
 int is_stop(int y, int x);
 int is_move(char c);
 int is_wall(int y, int x);
@@ -60,7 +61,7 @@ int main(){
 	switch(ret){
 		case DEATH:	msg_center("you died.");
 					break;
-		case QUIT:	msg_center("merci fuer gar nuet.");
+		case QUIT:	msg_center("merci fuer gar nuet - thanks for \"playing\"!");
 					break;
 		case SUCC: 	msg_center("you fuckin did it!");
 					break;
@@ -77,6 +78,7 @@ void raus(void){
 		free(g_map);
 	}
 	endwin();
+	printf("I like the Beach Boys!\n");
 }
 
 void splash(char msg[]){
@@ -243,6 +245,7 @@ int game(){
 		}
 
 		check_bounds(&p, max_y, max_x);
+
 		if(p.x == enemy.x && p.y == enemy.y){
 			msg_center("DAMN BOI");
 			sleep(1);
@@ -271,7 +274,6 @@ void clr(){
 		}
 	}
 }
-
 
 void gen_dungeon(dungeon *d, int y_r, int x_r){
 	int x_o, y_o, width, height;
@@ -481,22 +483,56 @@ void eatshit(){
 	delwin(help_win);
 }
 
-void inventory(entity *p){
-	if(p->inventory_size == 0){
-		mvprintw(0, 0, "your inventory is empty.");
-		refresh();
-		sleep(1);
-		return;
-	}else{
-		WINDOW *inv_win;
-		inv_win = newwin(max_y, max_x, 0, 0);
-		mvprintw(0, 0, "~~~~INVENTORY~~~~");
-		mvprintw(1, 0, "Press any key to exit.");
-		wrefresh(inv_win);
-		getch();
-		delwin(inv_win);
-		return;
+int is_inv_cmd(char c){
+	char invset[] = {"g"};
+	int invs_len = strlen(invset);
+	for(int i=0;i<invs_len;i++){
+		if(c == invset[i]){
+			return 1;
+		}
 	}
+	return 0;
+}
+
+void inventory(entity *p){
+	WINDOW *inv_win;
+	inv_win = newwin(max_y, max_x, 0, 0);
+	mvprintw(0, 0, "~~~~INVENTORY~~~~");
+	if(p->inventory_size == 0){
+		mvprintw(1, 0, "your inventory is empty.");
+		mvprintw(2, 0, "Press any key to exit.");
+		wrefresh(inv_win);
+
+		getch();
+		goto i_exit;
+	}
+
+	mvprintw(1, 0, "Command list.");
+	mvprintw(2, 0, "Press x to exit.");
+	//print the actual inventory
+
+	wrefresh(inv_win);
+
+	//loop through commands
+
+	char c;
+	while(1){
+		c = getch();
+		if(is_inv_cmd(c)){
+			//do something
+			eatshit();
+			goto i_exit;
+		}else{
+			switch(c){
+				case 'x': goto i_exit;
+			}
+		}
+	}
+
+i_exit:
+	wrefresh(inv_win);
+	delwin(inv_win);
+	return;
 }
 
 //MOVEMENT
@@ -551,8 +587,8 @@ int is_in_bounds(int y, int x){
 	return (y<max_y && y>=0 && x<max_x && x>=0);
 }
 
-int is_in_bounds2(int y, int x, int min_y, int min_x, int max_y, int max_x){
-	return (y<max_y && y>=min_y && x<max_x && x>=min_x);
+int is_in_bounds2(int y, int x, int min_y, int min_x, int mx_y, int mx_x){
+	return (y<mx_y && y>=min_y && x<mx_x && x>=min_x);
 
 	/*
 	typedef struct rect{

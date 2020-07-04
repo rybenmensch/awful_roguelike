@@ -4,7 +4,7 @@
 typedef enum{melee, ranged, ammo, armor, food} item_type;
 
 char coll_ob[] = "#|_-+";
-char stop_ob[] = "A";
+char stop_ob[] = "A*";
 
 typedef struct _i{
     char *name;
