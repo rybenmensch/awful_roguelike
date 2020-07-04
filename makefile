@@ -1,2 +1,2 @@
 make:
-	@gcc -o r rogue.c -lncurses
+	@gcc -o bin/r rogue.c -lncurses
